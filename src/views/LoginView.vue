@@ -39,7 +39,7 @@
           <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded shadow">Login</button>
         </form>
 
-        <p class="text-sm text-center mt-4">Don't have an account? <a href="#" class="text-pink-500 hover:underline">Sign up</a></p>
+        <p class="text-sm text-center mt-4">Não possui uma conta? <RouterLink to="/register" class="text-pink-500 hover:underline">Sign up</RouterLink></p>
       </div>
 
       <!-- Right Side Section -->
