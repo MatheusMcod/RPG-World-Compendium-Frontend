@@ -36,7 +36,7 @@
             <a href="#" class="text-pink-500 hover:underline">Forgot Password</a>
           </div>
 
-          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded shadow">Login</button>
+          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded shadow cursor-pointer">Login</button>
         </form>
 
         <p class="text-sm text-center mt-4">Não possui uma conta? <RouterLink to="/register" class="text-pink-500 hover:underline">Sign up</RouterLink></p>
@@ -56,6 +56,7 @@ import requests from '@/services/requests';
 import { reactive } from 'vue';
 import { userAuthStore } from '@/stores/auth';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const user = reactive({
   email: "",
@@ -65,6 +66,7 @@ const user = reactive({
 const authStore = userAuthStore();
 const rememberMe = ref(false)
 const showPassword = ref(false)
+const router = useRouter();
 
 function togglePassword() {
   showPassword.value = !showPassword.value
@@ -75,6 +77,7 @@ async function login() {
     const {data} = await requests.post('users/login/', user);
 
     authStore.setToken(data.token);
+    router.push('/teste')
   } catch (error) {
     console.error('Error Login:', error);
   }
