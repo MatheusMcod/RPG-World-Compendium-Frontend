@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-pink-50">
+  <div class="min-h-screen flex items-center justify-center bg-pink-100">
     <div class="bg-white rounded-3xl shadow-lg p-8 md:p-12 flex flex-col md:flex-row w-full max-w-5xl">
 
       <div class="hidden md:block w-full md:w-1/2 rounded-2xl overflow-hidden">
@@ -16,27 +16,27 @@
           <h1 class="text-xl font-semibold">World Compendium</h1>
         </div>
 
-        <h2 class="text-2xl font-bold mb-2">Sign up</h2>
+        <h2 class="text-2xl font-bold mb-2">Registro</h2>
         <p class="text-sm text-gray-500 mb-6">Crie sua conta para acessar seu compendium</p>
 
         <form @submit.prevent="handleSubmit" class="space-y-4">
           <input
             type="text"
             placeholder="Username"
-            v-model="form.username"
+            v-model="userRegister.name"
             class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <input
             type="email"
             placeholder="Email"
-            v-model="form.email"
+            v-model="userRegister.email"
             class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <div class="relative">
             <input
               :type="showPassword ? 'text' : 'password'"
               placeholder="Password"
-              v-model="form.password"
+              v-model="userRegister.password"
               class="w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
@@ -51,7 +51,7 @@
             <input
               :type="showPassword ? 'text' : 'password'"
               placeholder="Confirm Password"
-              v-model="form.confirmPassword"
+              v-model="userRegister.confirm_password"
               class="w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
@@ -81,18 +81,26 @@
 </template>
 
 <script setup lang="ts">
-  import { ref } from 'vue'
+  import requests from '@/services/requests';
+  import { useRouter } from 'vue-router';
+  import { reactive, ref } from 'vue'
 
-  const form = ref({
-    username: '',
+  const userRegister = reactive({
+    name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirm_password: ''
   })
-
+  const router = useRouter();
   const showPassword = ref(false)
 
-  function handleSubmit() {
-    console.log('Form data:', form.value)
+  async function handleSubmit() {
+    try {
+      const {data} = await requests.post('users/register/', userRegister);
+
+      router.push('/login');
+    } catch (error) {
+      console.log('Error Login:', error);
+    }
   }
 </script>
