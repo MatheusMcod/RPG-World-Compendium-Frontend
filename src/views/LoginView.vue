@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-pink-100 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl flex max-w-5xl w-full overflow-hidden">
-      <!-- Login Section -->
+
       <div class="w-full md:w-1/2 p-8">
         <div class="flex items-center space-x-2 mb-6">
           <img src="../assets/Logo.png" alt="Logo" class="h-10" />
@@ -42,7 +42,6 @@
         <p class="text-sm text-center mt-4">Não possui uma conta? <RouterLink to="/register" class="text-pink-500 hover:underline">Sign up</RouterLink></p>
       </div>
 
-      <!-- Right Side Section -->
       <div class="hidden md:flex flex-col justify-center items-center w-1/2 bg-white p-8">
         <img src="https://media.indiedb.com/cache/images/games/1/53/52512/thumb_620x2000/campfire1.gif" alt="Campfire Art" class="rounded-xl mb-6" />
         <p class="text-center text-lg font-semibold">Transforme sua maneira de construir mundos</p>
