@@ -73,7 +73,7 @@ function togglePassword() {
 
 async function login() {
   try {
-    const {data} = await requests.post('users/login/', user);
+    const {data} = await requests.post('user/auth/login/', user);
 
     authStore.setToken(data.token);
     router.push('/teste')
