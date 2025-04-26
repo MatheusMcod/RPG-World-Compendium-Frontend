@@ -33,7 +33,6 @@
               <input type="checkbox" v-model="rememberMe" class="form-checkbox text-blue-500 mr-2" />
               Remember me
             </label>
-            <a href="#" class="text-pink-500 hover:underline">Forgot Password</a>
           </div>
 
           <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded shadow cursor-pointer">Login</button>
