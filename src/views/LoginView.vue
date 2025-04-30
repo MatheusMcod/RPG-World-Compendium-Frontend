@@ -52,9 +52,10 @@
 <script setup lang="ts">
 import requests from '@/services/requests';
 import { reactive } from 'vue';
-import { userAuthStore } from '@/stores/auth';
+import { userAuthStore } from '@/stores/userAuthStore';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+
 
 const user = reactive({
   email: "",
@@ -73,9 +74,9 @@ function togglePassword() {
 async function login() {
   try {
     const {data} = await requests.post('user/auth/login/', user);
-
-    authStore.setToken(data.token);
-    router.push('/teste')
+    authStore.setAccessToken(data.access);
+    authStore.setRefreshToken(data.refresh);
+    router.push('/teste');
   } catch (error) {
     console.error('Error Login:', error);
   }

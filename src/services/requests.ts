@@ -1,17 +1,16 @@
 import axios, { AxiosError } from 'axios';
-import type { InternalAxiosRequestConfig, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import type { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import router from '@/router';
+import { userAuthStore } from '@/stores/userAuthStore';
 
 interface RefreshResponse {
   access: string;
-  refresh?: string;
 }
 
 interface FailedRequest {
-  resolve: (value?: unknown) => void;
+  resolve: (value: string | PromiseLike<string>) => void;
   reject: (reason?: unknown) => void;
 }
-
 
 const axiosInstance = axios.create({
   baseURL: 'http://localhost:8000/api/v1',
@@ -21,69 +20,75 @@ let isRefreshing = false;
 let failedQueue: FailedRequest[] = [];
 
 const processQueue = (error: AxiosError | null, token: string | null) => {
-  failedQueue.forEach(prom => {
-    if (error) {
-      prom.reject(error);
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error || !token) {
+      reject(error);
     } else {
-      prom.resolve(token);
+      resolve(token);
     }
   });
   failedQueue = [];
 };
 
-axiosInstance.interceptors.request.use(
-  (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-    const token = localStorage.getItem('access_token');
-    if (token && config.headers) {
-      config.headers['Authorization'] = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error: AxiosError) => Promise.reject(error)
-);
+axiosInstance.interceptors.request.use(config => {
+  const authStore = userAuthStore();
+  const token = authStore.accessToken;
+
+  if (token && config.headers) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  return config;
+});
 
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse): AxiosResponse => response,
   async (error: AxiosError): Promise<AxiosResponse | void> => {
-    const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
       if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        }).then((token) => {
+        try {
+          const token = await new Promise<string>((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          });
           if (originalRequest.headers) {
             originalRequest.headers['Authorization'] = `Bearer ${token}`;
           }
           return axiosInstance(originalRequest);
-        });
+        } catch (queueError) {
+          return Promise.reject(queueError);
+        }
       }
 
-      originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        const refreshToken = localStorage.getItem('refresh_token');
 
-        const res = await axios.post<RefreshResponse>('http://localhost:8000/api/v1/user/', {
-          refresh_token: refreshToken,
-        });
+        const refresh = localStorage.getItem('refresh');
+        console.log(refresh)
+        const { data } = await axiosInstance.post<RefreshResponse>('user/auth/refresh/', { refresh });
 
-        const { access, refresh } = res.data;
-        localStorage.setItem('access_token', access);
-        if (refresh) localStorage.setItem('refresh_token', refresh);
+        const { access } = data;
+
+        const authStore = userAuthStore();
+        authStore.setAccessToken(access);
 
         processQueue(null, access);
+
         if (originalRequest.headers) {
           originalRequest.headers['Authorization'] = `Bearer ${access}`;
         }
+
         return axiosInstance(originalRequest);
-      } catch (err) {
-        processQueue(err as AxiosError, null);
-        localStorage.removeItem('access');
-        localStorage.removeItem('refresh');
+      } catch (refreshError) {
+        processQueue(refreshError as AxiosError, null);
+        const authStore = userAuthStore();
+        authStore.clearToken();
         router.push({ name: 'login' });
-        return Promise.reject(err);
+        return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }

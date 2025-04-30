@@ -96,8 +96,8 @@
 
   async function handleSubmit() {
     try {
-      const {data} = await requests.post('user/auth/register/', userRegister);
-
+      const { data } = await requests.post('user/auth/register/', userRegister);
+      console.log(data)
       router.push('/login');
     } catch (error) {
       console.log('Error Login:', error);
