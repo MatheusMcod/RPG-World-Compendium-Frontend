@@ -41,10 +41,11 @@
             />
             <button
               type="button"
-              class="absolute right-2 top-2"
-              @click="showPassword = !showPassword"
+              class="absolute right-2 top-2 cursor-pointer"
+              @click="togglePassword"
             >
-              👁️
+              <span v-if="showPassword" class="cursor-pointer"><i class="fa-solid fa-eye-slash"></i></span>
+              <span v-else class="cursor-pointer"><i class="fa-solid fa-eye"></i></span>
             </button>
           </div>
           <div class="relative">
@@ -57,9 +58,10 @@
             <button
               type="button"
               class="absolute right-2 top-2"
-              @click="showPassword = !showPassword"
+              @click="togglePassword"
             >
-              👁️
+                <span v-if="showPassword" class="cursor-pointer"><i class="fa-solid fa-eye-slash"></i></span>
+                <span v-else class="cursor-pointer"><i class="fa-solid fa-eye"></i></span>
             </button>
           </div>
 
@@ -83,7 +85,7 @@
 <script setup lang="ts">
   import requests from '@/services/requests';
   import { useRouter } from 'vue-router';
-  import { reactive, ref } from 'vue'
+  import { reactive, ref } from 'vue';
 
   const userRegister = reactive({
     name: '',
@@ -92,7 +94,11 @@
     confirm_password: ''
   })
   const router = useRouter();
-  const showPassword = ref(false)
+  const showPassword = ref(false);
+
+function togglePassword() {
+  showPassword.value = !showPassword.value
+}
 
   async function handleSubmit() {
     try {

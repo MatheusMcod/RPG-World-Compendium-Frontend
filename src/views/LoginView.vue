@@ -21,9 +21,9 @@
             <label class="block text-sm font-medium mb-1" for="password">Password</label>
             <div class="relative">
               <input :type="showPassword ? 'text' : 'password'" v-model="user.password" id="password" class="w-full border border-gray-300 rounded p-2 pr-10 focus:outline-none focus:ring focus:border-blue-300" required />
-              <button type="button" @click="togglePassword" class="absolute inset-y-0 right-2 flex items-center text-gray-500">
-                <span v-if="showPassword">🙈</span>
-                <span v-else>👁️</span>
+              <button type="button" @click="togglePassword" class="absolute inset-y-0 right-2 flex items-center">
+                <span v-if="showPassword" class="cursor-pointer"><i class="fa-solid fa-eye-slash"></i></span>
+                <span v-else class="cursor-pointer"><i class="fa-solid fa-eye"></i></span>
               </button>
             </div>
           </div>
