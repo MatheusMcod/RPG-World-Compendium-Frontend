@@ -74,9 +74,11 @@ function togglePassword() {
 async function login() {
   try {
     const {data} = await requests.post('user/auth/login/', user);
+    console.log(data)
     authStore.setAccessToken(data.access);
     authStore.setRefreshToken(data.refresh);
-    router.push('/teste');
+    router.push('/campaigns/select');
+
   } catch (error) {
     console.error('Error Login:', error);
   }

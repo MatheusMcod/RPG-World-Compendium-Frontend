@@ -10,6 +10,10 @@ import "highlight.js/styles/github.css";
 import router from "./router";
 import { createPinia } from 'pinia';
 import "./assets/main.css";
+import PrimeVue from 'primevue/config';
+import Aura from '@primeuix/themes/aura';
+import ToastService from 'primevue/toastservice';
+
 
 
 hljs.registerLanguage('json', json);
@@ -20,6 +24,7 @@ const pinia = createPinia()
 library.add(faLink, faUser, faPowerOff);
 
 app
+  .use(ToastService)
   .use(hljsVuePlugin)
   .use(router)
   .use(pinia)

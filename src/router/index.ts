@@ -24,9 +24,9 @@ const router = createRouter({
       }
     },
     {
-      path: '/teste',
-      name: 'teste',
-      component: () => import('../views/TesteView.vue'),
+      path: '/campaigns/select',
+      name: 'campaigns-select',
+      component: () => import('../views/CampaignSelectView.vue'),
       meta: {
         requiresAuth: true,
       }
