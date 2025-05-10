@@ -26,7 +26,7 @@
               class="p-4 bg-gray-50 rounded-lg flex justify-between items-center"
             >
               <span>{{ campaign.worldName }}</span>
-              <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded cursor-pointer">
+              <button @click="joinCampaignRequest(campaign.id)" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded cursor-pointer">
                 Solicitar entrada
               </button>
             </li>
@@ -43,29 +43,49 @@
             >
               <span>{{ Invite.campaign.worldName }}</span>
               <div class="space-x-2">
-                <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded cursor-pointer">Aceitar</button>
-                <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded cursor-pointer">Recusar</button>
+                <button @click="responseJoinRequest(Invite.campaign.id, 'accepted')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded cursor-pointer">Aceitar</button>
+                <button @click="responseJoinRequest(Invite.campaign.id, 'rejected')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded cursor-pointer">Recusar</button>
               </div>
-            </li>
-          </ul>
-        </div>
-
-        <div v-if="activeTab === 'Minhas Campanhas'">
-          <h2 class="text-xl font-bold mb-2">Minhas Campanhas</h2>
-          <ul class="space-y-2">
-            <li
-              v-for="(MyCampaign, i) in MyCampaigns"
-              :key="i"
-              class="p-4 bg-green-50 rounded-lg"
-            >
-              {{ MyCampaign.worldName }}
             </li>
           </ul>
         </div>
       </div>
 
+      <div v-if="activeTab === 'Minhas Campanhas'">
+        <h2 class="text-xl font-bold mb-2">Minhas Campanhas</h2>
+        <ul class="space-y-2">
+          <li
+            v-for="(MyCampaign, i) in MyCampaigns"
+            :key="i"
+            class="p-4 bg-green-50 rounded-lg flex justify-between items-center"
+          >
+            <span>{{ MyCampaign.worldName }}</span>
+            <div class="space-x-2">
+              <button
+                @click="goToCampaign(MyCampaign.id)"
+                class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded cursor-pointer"
+              >
+                Acessar
+              </button>
+              <button
+                @click="removeCampaign(MyCampaign.id)"
+                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded cursor-pointer"
+              >
+                Remover
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <CreateCampaignModal
+        :visible="showModal"
+        @close="showModal = false"
+        @campaign-created="handleCampaignCreated"
+      />
+
       <div class="mt-6 text-right">
-        <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg cursor-pointer">
+        <button @click="showModal = true" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg cursor-pointer">
           Criar Campanha
         </button>
       </div>
@@ -76,7 +96,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import requests from '@/services/requests';
-import NavBar from '../components/NavBar.vue'
+import NavBar from '../components/NavBar.vue';
+import CreateCampaignModal from '../components/CreateCampaignModal.vue';
+import { useRouter } from 'vue-router';
 
 interface Player {
   id: number;
@@ -104,14 +126,51 @@ type Invitation = {
   created_at: string;
 };
 
-const tabs = ['Campanhas Públicas', 'Convites Pendentes', 'Minhas Campanhas']
-const activeTab = ref('Campanhas Públicas')
+const tabs = ['Campanhas Públicas', 'Convites Pendentes', 'Minhas Campanhas'];
+const activeTab = ref('Campanhas Públicas');
 
-const publicCampaigns = ref<Campaign[]>([])
+const publicCampaigns = ref<Campaign[]>([]);
+const pendingInvitation = ref<Invitation[]>([]);
+const MyCampaigns = ref<Campaign[]>([]);
+const showModal = ref(false);
+const router = useRouter();
 
-const pendingInvitation = ref<Invitation[]>([])
+const handleCampaignCreated = (newCampaign: Campaign) => {
+  MyCampaigns.value.push(newCampaign);
+}
 
-const MyCampaigns = ref<Campaign[]>([])
+const goToCampaign = (id: number) => {
+  router.push(`/campaign/${id}`);
+}
+
+const removeCampaign = async (id: number) => {
+  try {
+    await requests.delete(`campaign/?campaign_id=${id}`);
+    MyCampaigns.value = MyCampaigns.value.filter(c => c.id !== id);
+  } catch (error) {
+    console.error('Erro ao remover campanha:', error);
+  }
+}
+
+const joinCampaignRequest = async (campaign_id: number) => {
+  try {
+    const response = await requests.post('campaign/join/', {
+      campaign: campaign_id
+    })
+  } catch (error) {
+    console.error('Error joining campaign:', error);
+  }
+}
+
+const responseJoinRequest = async(campaign_id: number, join_response: string) => {
+  try {
+    const response = await requests.post(`campaign/join/${campaign_id}/response/`, {
+      status: join_response
+    })
+  } catch (error) {
+    console.error('Error joining campaign:', error);
+  }
+}
 
 onMounted(async () => {
   try {

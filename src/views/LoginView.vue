@@ -77,6 +77,7 @@ async function login() {
     console.log(data)
     authStore.setAccessToken(data.access);
     authStore.setRefreshToken(data.refresh);
+    authStore.fetchUser();
     router.push('/campaigns/select');
 
   } catch (error) {
