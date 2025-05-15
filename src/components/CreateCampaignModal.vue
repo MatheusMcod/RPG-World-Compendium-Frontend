@@ -53,6 +53,8 @@ const close = () => {
   emits('close')
 }
 
+console.log(auth.user)
+
 const createCampaign = async () => {
   try {
     const response = await requests.post('campaign/', {

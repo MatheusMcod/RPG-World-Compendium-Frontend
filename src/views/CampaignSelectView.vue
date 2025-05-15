@@ -99,6 +99,7 @@ import requests from '@/services/requests';
 import NavBar from '../components/NavBar.vue';
 import CreateCampaignModal from '../components/CreateCampaignModal.vue';
 import { useRouter } from 'vue-router';
+import { campaignStore } from '@/stores/campaignStore';
 
 interface Player {
   id: number;
@@ -134,13 +135,21 @@ const pendingInvitation = ref<Invitation[]>([]);
 const MyCampaigns = ref<Campaign[]>([]);
 const showModal = ref(false);
 const router = useRouter();
+const campaignStoreInstance = campaignStore();
 
 const handleCampaignCreated = (newCampaign: Campaign) => {
   MyCampaigns.value.push(newCampaign);
 }
 
-const goToCampaign = (id: number) => {
-  router.push(`/campaign/${id}`);
+const goToCampaign = async (id: number) => {
+  try {
+      const response = await requests.get(`/campaign/${id}`);
+      campaignStoreInstance.setCampaign(response.data);
+      router.push(`/campaign/${id}`);
+    } catch (error) {
+      console.error('Erro ao buscar usuário:', error)
+    }
+
 }
 
 const removeCampaign = async (id: number) => {

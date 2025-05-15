@@ -13,8 +13,11 @@ interface User {
 export const userAuthStore = defineStore('userAuth', () => {
   const accessToken = ref<string | null>(localStorage.getItem('access'));
   const refreshToken = ref<string | null>(localStorage.getItem('refresh'));
+  const storedUser = localStorage.getItem('user');
 
-  const user = ref<User | null>(null);
+  const user = ref<User | null>(
+      storedUser ? JSON.parse(storedUser) : null
+    );
 
   function setAccessToken(access: string) {
     accessToken.value = access;
@@ -31,6 +34,7 @@ export const userAuthStore = defineStore('userAuth', () => {
     try {
       const response = await axiosInstance.get('/user/')
       user.value = response.data
+      localStorage.setItem('user', JSON.stringify(response.data));
     } catch (error) {
       console.error('Erro ao buscar usuário:', error)
     }
